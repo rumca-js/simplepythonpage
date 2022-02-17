@@ -7,31 +7,163 @@ import logging
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
+
+class HtmlElement(object):
+
+    def __init__(self, text = ""):
+        self._text = text
+
+    def html(self):
+        return self._text
+
+
+class HtmlContainer(HtmlElement):
+
+    def __init__(self, text = None):
+        super().__init__()
+        self.items = []
+        self._text = text
+        self._container_text = ""
+
+    def add(self, item):
+        self.items.append(item)
+
+    def html(self):
+        if self._text:
+            return "<{0}>{1}</{0}>".format(self._container_text, self._text)
+
+        html_text = ""
+
+        for item in self.items:
+            html_text += "<{0}>{1}</{0}>".format(self._container_text, item.html() )
+
+        return html_text
+
+
+class HtmlParagraph(HtmlContainer):
+
+    def __init__(self, text = None):
+        super().__init__(text)
+        self._container_text = "p"
+
+
+class HtmlDiv(HtmlContainer):
+
+    def __init__(self, text = None):
+        super().__init__(text)
+        self._container_text = "div"
+
+
+class HtmlLink(HtmlElement):
+    def __init__(self, title, destination):
+        super().__init__()
+        self._title = title
+        self._destination = destination
+
+    def html(self):
+        return '<a href="{1}">{0}</a>'.format(self._title, self._destination)
+
+
+class HtmlBr(HtmlElement):
+    def __init__(self):
+        super().__init__()
+
+    def html(self):
+        return '<br>'
+
+
+class HtmlLabel(HtmlElement):
+    def __init__(self, text, afor=None):
+        super().__init__()
+        self._text = text
+        self._afor = afor
+
+    def html(self):
+        if self._afor:
+            return '<label for="{0}">{1}</label>'.format(self._afor, self._text)
+        else:
+            return '<label>{0}</label>'.format(self._text)
+
+
+class HtmlFormInput(HtmlElement):
+
+    def __init__(self, atype = None, aid = None):
+        super().__init__()
+
+        self._items = {}
+        if atype:
+            self._items["type"] = atype
+        if aid:
+            self._items["id"] = aid
+            self._items["name"] = aid
+
+    def add_key(self, key, value):
+        self._items[key] = value
+
+    def html(self):
+        input_text = ""
+        for item in self._items:
+            input_text += '{0}="{1}" '.format(item, self._items[item])
+
+        return "<input {0}>".format(input_text)
+
+
+class HtmlForm(HtmlElement):
+
+    def __init__(self):
+        super().__init__()
+        self._inputs = []
+        self._action = None
+
+    def add_input(self, ainput):
+        self._inputs.append(ainput)
+
+    def add_action(self, action):
+        self._action = action
+
+    def html(self):
+        input_html = ""
+        for ainput in self._inputs:
+            input_html += ainput.html()
+
+        if not self._action:
+            return """<form>{0}</form>""".format(input_html)
+        else:
+            return """<form action="{0}">{1}</form>""".format(self._action, input_html)
+
+
+class HtmlBackForm(HtmlForm):
+
+    def __init__(self):
+        super().__init__()
+        self.add_input(HtmlFormInput())
+
+
 class PageBasic(object):
 
     def __init__(self, handler = None):
         self._handler = handler
+        self._title = "SimplePythonPageTitle"
+        self._header = ""
+        self._footer = ""
 
-        self.init_default_values()
-
-    def init_default_values(self):
-
-        self._header = """
-        <html><head><title>SimplePythonPage</title></head>
-        <body>
-        """
-
-        self.set_page_contents("Default document")
-
-        self._footer = """
-        </body></html>
-        """
+    def set_title(self, title):
+        self._title = title
 
     def set_handler(self, handler):
         self._handler = handler
 
-    def split_path(self):
-        return str(self._handler.path).split("/").pop()
+    def get_path_relative(self):
+        return self._handler.get_path_relative()
+
+    def get_args(self):
+        return self._handler.get_args()
+
+    def get_arg(self, arg):
+        return self._handler.get_args()[arg]
+
+    def has_args(self):
+        return len(self._handler.get_args()) > 0
 
     def write_string(self, string):
         self._handler.wfile.write(bytes(string, "utf-8"))
@@ -42,10 +174,69 @@ class PageBasic(object):
     def set_page_contents(self, page_contents):
         self._page_contents = page_contents
 
+    def set_header(self, header):
+        self._header = header
+
+    def set_footer(self, footer):
+        self._header = header
+
     def write(self):
+        if self._header == "":
+            self._header = """
+            <html><head><title>{0}</title></head>
+            <body>
+            """.format(self._title)
+
+        if self._page_contents == "":
+            self.set_page_contents("Default document")
+
+        if self._footer == "":
+            self._footer = """
+            </body></html>
+            """
+
         self.write_string(self._header)
         self.write_string(self.get_page_contents() )
         self.write_string(self._footer)
+
+    def p(self, text = None):
+        return HtmlParagraph(text)
+
+    def div(self, text = None):
+        return HtmlDiv(text)
+
+    def br(self):
+        return HtmlBr()
+
+    def link(self, title, src):
+        return HtmlLink(title, src)
+
+    def form_input(self, itype = None, iid = None):
+        return HtmlFormInput(itype, iid)
+
+    def form_input_submit(self):
+        ainput = HtmlFormInput()
+        ainput.add_key("type","submit")
+        ainput.add_key("value","Submit")
+        return ainput
+
+    def form(self):
+        return HtmlForm()
+
+    def form_go_back(self):
+
+        form = self.form()
+        ainput = HtmlFormInput()
+        ainput.add_key("type","button")
+        ainput.add_key("value","Go back!")
+        ainput.add_key("onclick","history.back()")
+
+        form.add_input(ainput)
+
+        return form
+
+    def label(self, text, afor = None):
+        return HtmlLabel(text, afor)
 
 
 class ExamplePage(PageBasic):
@@ -80,7 +271,6 @@ class PageBuilder(object):
             return None
 
 
-
 class SimplePythonPageServer(BaseHTTPRequestHandler):
 
     def do_GET(self):
@@ -94,7 +284,7 @@ class SimplePythonPageServer(BaseHTTPRequestHandler):
         if page:
             page.write()
         else:
-            logging.error("No page found")
+            logging.error("Page not supported: {0}".format(self.get_path_relative() ) )
 
     def get_path_relative(self):
         text = str(self.path)
@@ -103,15 +293,7 @@ class SimplePythonPageServer(BaseHTTPRequestHandler):
             return text[:wh]
         return text
 
-    def split_path(self):
-        """ Returns last element in path """
-        text = str(self.path).split("/").pop()
-        wh = text.find("?")
-        if wh != -1:
-            return text[:wh]
-        return text
-
-    def get_GET_arguments(self):
+    def get_args(self):
         """ returns GET arguments in map  key = value """
         arguments = {}
 
@@ -136,6 +318,10 @@ class SimplePythonPageSuperServer():
         self._port = port
 
         self._webServer = HTTPServer(('', self._port), SimplePythonPageServer)
+        self._close_items = []
+
+    def add_close_item(self, closeitem):
+        self._close_items.append(closeitem)
 
     def start_server(self):
 
@@ -147,6 +333,9 @@ class SimplePythonPageSuperServer():
             pass
 
         self._webServer.server_close()
+
+        for item in self._close_items:
+            item.close()
 
         logging.info("Server stopped.")
 
