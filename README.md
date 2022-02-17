@@ -27,3 +27,15 @@ Therefore each request opens a different PageBasic registered for an URL.
 
     superserver.start_server()
 ```
+
+# Example page implementation
+
+```
+
+class ExamplePage(PageBasic):
+    def __init__(self):
+        super().__init__()
+
+        self.set_page_contents("""<p>List page</p>""")
+
+````
