@@ -1,17 +1,19 @@
 # Overview
 
-Simple Python Page server
+Simple Python Page server.
 
-Use:
- - Register page builder
- - Create server
+Write simple GUI as a web interface! You do not have to use pyqt or pygtk. You can write simple 'layouts' with HTML, with all benefits of it!
+
+All actions are provided by server pages:
+ - each page is a 'function' potentially with arguments
+ - each page can lead to a different page
+
+How to use:
+ - Register pages in page builder
+ - set builder in HTTP server
  - Start server
 
-Page builder provides pages for particular urls.
-
 Each page should implement PageBasic object.
-
-Therefore each request opens a different PageBasic registered for an URL.
 
 # Example use
 
@@ -31,16 +33,35 @@ Therefore each request opens a different PageBasic registered for an URL.
 # Example page implementation
 
 ```
+class AddItemPage(CommonUtilsPage):
 
-class ExamplePage(PageBasic):
-    def __init__(self):
-        super().__init__()
+    def write(self, args):
 
-        self.set_page_contents("""<p>List page</p>""")
+        self.set_title("Add Item Page")
 
-````
+        p = self.p()        # create paragraph
+        p.add(self.get_menu())
 
-This allows to write simple HTML code:
+        if len(args) == 0:
+            p.add(self.get_form_new_song())
+        else:
+            link = args['link_name']
+            artist = args['artist']
+
+        self.set_page_contents(p.html() )       # sets the page contents
+
+        super().write()         # writes the page for browser
+```
+
+Functions for HTML marks were provided:
+ - p
+ - div
+ - form
+ - link
+ - form\_input
+ - br
+ - hr
+ ....
 
 ```
         add_form = self.form()
