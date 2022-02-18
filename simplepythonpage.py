@@ -64,14 +64,6 @@ class HtmlLink(HtmlElement):
         return '<a href="{1}">{0}</a>'.format(self._title, self._destination)
 
 
-class HtmlBr(HtmlElement):
-    def __init__(self):
-        super().__init__()
-
-    def html(self):
-        return '<br>'
-
-
 class HtmlLabel(HtmlElement):
     def __init__(self, text, afor=None):
         super().__init__()
@@ -87,7 +79,7 @@ class HtmlLabel(HtmlElement):
 
 class HtmlFormInput(HtmlElement):
 
-    def __init__(self, atype = None, aid = None):
+    def __init__(self, atype = None, aid = None, default_value = None):
         super().__init__()
 
         self._items = {}
@@ -96,6 +88,10 @@ class HtmlFormInput(HtmlElement):
         if aid:
             self._items["id"] = aid
             self._items["name"] = aid
+
+        if default_value:
+            self._items["value"] = default_value
+            self._items["size"] = len(default_value)
 
     def add_key(self, key, value):
         self._items[key] = value
@@ -180,7 +176,7 @@ class PageBasic(object):
     def set_footer(self, footer):
         self._header = header
 
-    def write(self):
+    def write(self, args = None):
         if self._header == "":
             self._header = """
             <html><head><title>{0}</title></head>
@@ -199,6 +195,11 @@ class PageBasic(object):
         self.write_string(self.get_page_contents() )
         self.write_string(self._footer)
 
+    def super_write(self):
+        args = self.get_args()
+
+        self.write(args)
+
     def p(self, text = None):
         return HtmlParagraph(text)
 
@@ -206,18 +207,24 @@ class PageBasic(object):
         return HtmlDiv(text)
 
     def br(self):
-        return HtmlBr()
+        return HtmlElement("<br>")
+
+    def hr(self):
+        return HtmlElement("<hr>")
 
     def link(self, title, src):
         return HtmlLink(title, src)
 
-    def form_input(self, itype = None, iid = None):
-        return HtmlFormInput(itype, iid)
+    def form_input(self, itype = None, iid = None, default_value = None):
+        return HtmlFormInput(itype, iid, default_value)
 
-    def form_input_submit(self):
+    def form_input_submit(self, text = None):
         ainput = HtmlFormInput()
         ainput.add_key("type","submit")
-        ainput.add_key("value","Submit")
+        if not text:
+            ainput.add_key("value","Submit")
+        else:
+            ainput.add_key("value", text)
         return ainput
 
     def form(self):
@@ -282,7 +289,7 @@ class SimplePythonPageServer(BaseHTTPRequestHandler):
 
         page = _builder.get_page()
         if page:
-            page.write()
+            page.super_write()
         else:
             logging.error("Page not supported: {0}".format(self.get_path_relative() ) )
 
@@ -305,7 +312,7 @@ class SimplePythonPageServer(BaseHTTPRequestHandler):
                 inner_sp = item.split("=")
 
                 if len(inner_sp) > 1:
-                    arguments[inner_sp[0]] = urllib.parse.unquote(inner_sp[1])
+                    arguments[inner_sp[0]] = urllib.parse.unquote_plus(inner_sp[1])
 
         return arguments
 
