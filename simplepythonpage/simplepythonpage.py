@@ -19,39 +19,39 @@ class HtmlElement(object):
 
 class HtmlContainer(HtmlElement):
 
-    def __init__(self, text = None):
+    def __init__(self, container_text = "p", text = None):
         super().__init__()
         self.items = []
         self._text = text
-        self._container_text = ""
+        self._container_text = container_text
+        self._attributes = []
 
     def add(self, item):
         self.items.append(item)
 
+    def attribute(self, key, value):
+        self._attributes[key] = value
+
+    def attrs(self):
+        return self._attributes
+
     def html(self):
+        attr_text = ""
+        for attr_key in self._attributes:
+            attr = self._attributes[attr_key]
+            if attr_text != "":
+                attr_text += " "
+            attr_text += '{0}="{1}"'.format(attr_key, attr)
+
         if self._text:
-            return "<{0}>{1}</{0}>".format(self._container_text, self._text)
+            return "<{0} {1}>{2}</{0}>".format(self._container_text, attr_text, self._text)
 
         html_text = ""
 
         for item in self.items:
-            html_text += "<{0}>{1}</{0}>".format(self._container_text, item.html() )
+            html_text += "<{0} {1}>{2}</{0}>".format(self._container_text, attr_text, item.html() )
 
         return html_text
-
-
-class HtmlParagraph(HtmlContainer):
-
-    def __init__(self, text = None):
-        super().__init__(text)
-        self._container_text = "p"
-
-
-class HtmlDiv(HtmlContainer):
-
-    def __init__(self, text = None):
-        super().__init__(text)
-        self._container_text = "div"
 
 
 class HtmlLink(HtmlElement):
@@ -201,10 +201,13 @@ class PageBasic(object):
         self.write(args)
 
     def p(self, text = None):
-        return HtmlParagraph(text)
+        return HtmlContainer("p", text)
 
     def div(self, text = None):
-        return HtmlDiv(text)
+        return HtmlContainer("div", text)
+
+    def pre(self, text = None):
+        return HtmlContainer("pre", text)
 
     def br(self):
         return HtmlElement("<br>")
