@@ -205,6 +205,9 @@ class PageBasic(object):
     def get_args(self):
         return self._handler.get_args()
 
+    def get_client_address(self):
+        return self._handler.client_address
+
     def get_arg(self, arg):
         return self._handler.get_args()[arg]
 
