@@ -216,6 +216,9 @@ class PageBasic(object):
         self._header = header
 
     def write(self, args = None):
+        self.set_page_contents("Default document")
+
+    def write_page_contents(self, args = None):
         if self._header == "":
             self._header = """
             <html><head><title>{0}</title></head>
@@ -238,6 +241,7 @@ class PageBasic(object):
         args = self.get_args()
 
         self.write(args)
+        self.write_page_contents(args)
 
     def p(self, text = None):
         return HtmlContainer("p", text)
