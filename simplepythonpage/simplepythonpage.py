@@ -206,6 +206,9 @@ class PageBasic(object):
     def div(self, text = None):
         return HtmlContainer("div", text)
 
+    def span(self, text = None):
+        return HtmlContainer("span", text)
+
     def pre(self, text = None):
         return HtmlContainer("pre", text)
 
