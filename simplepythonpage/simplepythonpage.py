@@ -60,8 +60,18 @@ class HtmlContainer(HtmlElement):
         super().__init__(container_text, text, attrs)
         self.items = []
 
-    def add(self, item):
+    def push(self, item):
         self.items.append(item)
+
+    def insert(self, text):
+        if self._text is None:
+            self._text = ""
+
+        if text:
+            if isinstance(text, str):
+                self._text += text
+            else:
+                self._text += text.html()
 
     def html(self):
         attr_text = self.get_attr_text()
@@ -72,7 +82,11 @@ class HtmlContainer(HtmlElement):
         html_text = ""
 
         for item in self.items:
-            html_text += "<{0} {1}>{2}</{0}>".format(self._container_text, attr_text, item.html() )
+            if isinstance(item, str):
+                item_text = item
+            else:
+                item_text = item.html()
+            html_text += "<{0} {1}>{2}</{0}>".format(self._container_text, attr_text, item_text )
 
         return html_text
 
@@ -127,6 +141,31 @@ class HtmlForm(HtmlElement):
         else:
             return """<form action="{0}">{1}</form>""".format(self._action, input_html)
 
+
+class HtmlTable(HtmlElement):
+
+    def __init__(self, table_arg, with_header=False):
+        super().__init__()
+        self._data = table_arg
+        self._with_header = with_header
+
+    def html(self):
+        if self._with_header:
+            return self.html_with_header()
+        else:
+            return self.html_no_header()
+
+    def html_no_header(self):
+        text = ""
+
+        tab = HtmlContainer("table")
+        for row in self._data:
+            tr = HtmlContainer("tr")
+            for cell in row:
+                td = HtmlContainer("td", cell)
+                tr.insert(td)
+            tab.insert(tr)
+        return tab.html()
 
 class HtmlBackForm(HtmlForm):
 
@@ -219,6 +258,9 @@ class PageBasic(object):
     def hr(self):
         hto = HtmlOneLiner("hr")
         return hto
+
+    def table(self, table, with_header = False):
+        return HtmlTable(table, with_header)
 
     def img(self, src, width = None, height = None):
         hto = HtmlOneLiner("img")
