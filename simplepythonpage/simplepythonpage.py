@@ -148,6 +148,14 @@ class HtmlTable(HtmlElement):
         super().__init__()
         self._data = table_arg
         self._with_header = with_header
+        self._align = None
+        self._valign = None
+
+    def set_align(self, align):
+        self._align = align
+
+    def set_valign(self, valign):
+        self._valign = valign
 
     def html(self):
         if self._with_header:
@@ -163,6 +171,9 @@ class HtmlTable(HtmlElement):
             tr = HtmlContainer("tr")
             for cell in row:
                 td = HtmlContainer("td", cell)
+                if self._align:
+                    td.set_attr("align", self._align)
+                    td.set_attr("valign", self._valign)
                 tr.insert(td)
             tab.insert(tr)
         return tab.html()
