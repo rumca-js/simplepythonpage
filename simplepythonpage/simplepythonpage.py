@@ -10,38 +10,61 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 class HtmlElement(object):
 
-    def __init__(self, text = ""):
+    def __init__(self, container_text = "p", text = "", attrs = {}):
+        self._container_text = container_text
         self._text = text
+        self._attrs = {}
 
     def html(self):
         return self._text
 
+    def set_attr(self, key, value):
+        self._attrs[key] = value
+
+    def get_attr(self, key, value):
+        return self._attrs[key]
+
+    def attrs(self):
+        return self._attrs
+
+    def get_attr_text(self):
+        attr_text = ""
+        for attr_key in self._attrs:
+            attr = self._attrs[attr_key]
+            if attr_text != "":
+                attr_text += " "
+            attr_text += '{0}="{1}"'.format(attr_key, attr)
+        return attr_text
+
+    def set_text(self, text):
+        self._text = text
+
+    def get_text(self):
+        return self._text
+
+
+class HtmlOneLiner(HtmlElement):
+
+    def __init__(self, container_text = "img", attrs = {}):
+        super().__init__(container_text, "", attrs)
+
+    def html(self):
+        attr_text = self.get_attr_text()
+
+        return "<{0} {1}>".format(self._container_text, attr_text, self._text)
+
 
 class HtmlContainer(HtmlElement):
 
-    def __init__(self, container_text = "p", text = None):
-        super().__init__()
+    def __init__(self, container_text = "p", text = None, attrs = {}):
+        super().__init__(container_text, text, attrs)
         self.items = []
-        self._text = text
-        self._container_text = container_text
-        self._attributes = []
 
     def add(self, item):
         self.items.append(item)
 
-    def attribute(self, key, value):
-        self._attributes[key] = value
-
-    def attrs(self):
-        return self._attributes
-
     def html(self):
-        attr_text = ""
-        for attr_key in self._attributes:
-            attr = self._attributes[attr_key]
-            if attr_text != "":
-                attr_text += " "
-            attr_text += '{0}="{1}"'.format(attr_key, attr)
+        attr_text = self.get_attr_text()
 
         if self._text:
             return "<{0} {1}>{2}</{0}>".format(self._container_text, attr_text, self._text)
@@ -52,29 +75,6 @@ class HtmlContainer(HtmlElement):
             html_text += "<{0} {1}>{2}</{0}>".format(self._container_text, attr_text, item.html() )
 
         return html_text
-
-
-class HtmlLink(HtmlElement):
-    def __init__(self, title, destination):
-        super().__init__()
-        self._title = title
-        self._destination = destination
-
-    def html(self):
-        return '<a href="{1}">{0}</a>'.format(self._title, self._destination)
-
-
-class HtmlLabel(HtmlElement):
-    def __init__(self, text, afor=None):
-        super().__init__()
-        self._text = text
-        self._afor = afor
-
-    def html(self):
-        if self._afor:
-            return '<label for="{0}">{1}</label>'.format(self._afor, self._text)
-        else:
-            return '<label>{0}</label>'.format(self._text)
 
 
 class HtmlFormInput(HtmlElement):
@@ -210,13 +210,27 @@ class PageBasic(object):
         return HtmlContainer("pre", text)
 
     def br(self):
-        return HtmlElement("<br>")
+        hto = HtmlOneLiner("br")
+        return hto
 
     def hr(self):
-        return HtmlElement("<hr>")
+        hto = HtmlOneLiner("hr")
+        return hto
 
-    def link(self, title, src):
-        return HtmlLink(title, src)
+    def img(self, src, width = None, height = None):
+        hto = HtmlOneLiner("img")
+        hto.set_attr("src", src)
+        if width:
+            hto.set_attr("width", width)
+        if height:
+            hto.set_attr("height", height)
+        return hto
+
+    def link(self, title, dst):
+        cont = HtmlContainer("a")
+        cont.set_attr("href", dst)
+        cont.set_text(title)
+        return cont
 
     def form_input(self, itype = None, iid = None, default_value = None):
         return HtmlFormInput(itype, iid, default_value)
@@ -246,7 +260,10 @@ class PageBasic(object):
         return form
 
     def label(self, text, afor = None):
-        return HtmlLabel(text, afor)
+        cont = HtmlContainer("label")
+        cont.set_attr("for", afor)
+        cont.set_text(text)
+        return cont
 
 
 class ExamplePage(PageBasic):
