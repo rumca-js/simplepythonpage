@@ -260,6 +260,24 @@ class PageBasic(object):
     def p(self, text = None):
         return HtmlContainer("p", text)
 
+    def h1(self, text = None):
+        return HtmlContainer("h1", text)
+
+    def h2(self, text = None):
+        return HtmlContainer("h2", text)
+
+    def h3(self, text = None):
+        return HtmlContainer("h3", text)
+
+    def h4(self, text = None):
+        return HtmlContainer("h4", text)
+
+    def h5(self, text = None):
+        return HtmlContainer("h5", text)
+
+    def h6(self, text = None):
+        return HtmlContainer("h6", text)
+
     def div(self, text = None):
         return HtmlContainer("div", text)
 
