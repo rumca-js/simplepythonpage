@@ -444,9 +444,7 @@ class SimplePythonPageServer(BaseHTTPRequestHandler):
         return arguments
 
 
-def set_page_builder(builder):
-    global _builder
-    _builder = builder
+_builder = None
 
 
 class SimplePythonPageSuperServer():
@@ -458,11 +456,21 @@ class SimplePythonPageSuperServer():
         self._webServer = HTTPServer(('', self._port), SimplePythonPageServer)
         self._close_items = []
 
+    def get_builder(self):
+        global _builder
+        return _builder
+
+    def create_builder(self):
+        global _builder
+        _builder = PageBuilder()
+
     def add_close_item(self, closeitem):
         self._close_items.append(closeitem)
 
     def register_page(self, url, page):
-        _builder.register_page(url, page)
+        if self.get_builder() is None:
+            self.create_builder()
+        self.get_builder().register_page(url, page)
 
     def start_server(self):
 
