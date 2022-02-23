@@ -331,6 +331,13 @@ class PageBasic(object):
     def form(self):
         return HtmlForm()
 
+    def textarea(self, name, rows = 5, cols = 5):
+        c = HtmlContainer("textarea")
+        c.set_attr("name", name)
+        c.set_attr("rows", rows)
+        c.set_attr("cols", cols)
+        return c
+
     def form_go_back(self):
 
         form = self.form()
