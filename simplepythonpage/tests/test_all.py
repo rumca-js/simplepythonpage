@@ -66,6 +66,36 @@ class TestHtmlElement(unittest.TestCase):
 
         self.assertTrue(p.html() == '<p>test_text</p><p>,new_text</p>')
 
+    def test_page_basic_form_input(self):
+
+        page = simplepythonpage.PageBasic()
+        f = page.form_input("text", "url")
+
+        print("f HTML: " + f.html())
+        self.assertTrue(f.html() == '<input type="text" id="url" name="url">')
+
+    def test_page_basic_form_input_default_value(self):
+
+        page = simplepythonpage.PageBasic()
+        f = page.form_input("text", "url", "deeeeedbeaaaf")
+
+        print("f HTML: " + f.html())
+        self.assertTrue(f.html() == '<input type="text" id="url" name="url" value="deeeeedbeaaaf" size="13">')
+
+    def test_page_basic_form(self):
+        page = simplepythonpage.PageBasic()
+        f = page.form()
+        f.set_attr("action", "http://example.com")
+        f.set_attr("method", "POST")
+
+        f.add_input( page.label("Download link:", "url"))
+        f.add_input( page.form_input("text", "url"))
+        f.add_input( page.form_input_submit("Download"))
+
+        print("f HTML: " + f.html())
+
+        self.assertTrue(f.html() == '<form action="http://example.com" method="POST"><label for="url">Download link:</label><input type="text" id="url" name="url"><input type="submit" value="Download"></form>')
+
 
 if __name__ == '__main__':
     unittest.main()

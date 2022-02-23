@@ -50,9 +50,11 @@ class HtmlOneLiner(HtmlElement):
         super().__init__(container_text, "", attrs)
 
     def html(self):
-        attr_text = self.get_attr_text()
+        attr_text = ""
+        if self.get_attr_text():
+            attr_text = " " + self.get_attr_text()
 
-        return "<{0} {1}>".format(self._container_text, attr_text, self._text)
+        return "<{0}{1}>".format(self._container_text, attr_text, self._text)
 
 
 class HtmlContainer(HtmlElement):
@@ -91,55 +93,39 @@ class HtmlContainer(HtmlElement):
         return all_text
 
 
-class HtmlFormInput(HtmlElement):
+class HtmlFormInput(HtmlOneLiner):
 
     def __init__(self, atype = None, aid = None, default_value = None):
-        super().__init__()
+        super().__init__("input")
 
-        self._items = {}
         if atype:
-            self._items["type"] = atype
+            self.set_attr("type", atype)
         if aid:
-            self._items["id"] = aid
-            self._items["name"] = aid
+            self.set_attr("id", aid)
+            self.set_attr("name", aid)
 
         if default_value:
-            self._items["value"] = default_value
-            self._items["size"] = len(default_value)
-
-    def add_key(self, key, value):
-        self._items[key] = value
-
-    def html(self):
-        input_text = ""
-        for item in self._items:
-            input_text += '{0}="{1}" '.format(item, self._items[item])
-
-        return "<input {0}>".format(input_text)
+            self.set_attr("value", default_value)
+            self.set_attr("size", len(default_value))
 
 
-class HtmlForm(HtmlElement):
+class HtmlForm(HtmlContainer):
 
     def __init__(self):
-        super().__init__()
+        super().__init__("form")
         self._inputs = []
         self._action = None
 
     def add_input(self, ainput):
         self._inputs.append(ainput)
 
-    def add_action(self, action):
-        self._action = action
-
     def html(self):
         input_html = ""
         for ainput in self._inputs:
             input_html += ainput.html()
 
-        if not self._action:
-            return """<form>{0}</form>""".format(input_html)
-        else:
-            return """<form action="{0}">{1}</form>""".format(self._action, input_html)
+        self.set_text(input_html)
+        return super().html()
 
 
 class HtmlTable(HtmlElement):
@@ -335,11 +321,11 @@ class PageBasic(object):
 
     def form_input_submit(self, text = None):
         ainput = HtmlFormInput()
-        ainput.add_key("type","submit")
+        ainput.set_attr("type","submit")
         if not text:
-            ainput.add_key("value","Submit")
+            ainput.set_attr("value","Submit")
         else:
-            ainput.add_key("value", text)
+            ainput.set_attr("value", text)
         return ainput
 
     def form(self):
