@@ -15,9 +15,17 @@ class TestHtmlElement(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_page_basic_p(self):
+    def test_page_basic_p_empty(self):
         page = simplepythonpage.PageBasic()
         p = page.p()
+
+        print("P HTML: " + p.html())
+
+        self.assertTrue(p.html() == "")
+
+    def test_page_basic_p(self):
+        page = simplepythonpage.PageBasic()
+        p = page.p("")
 
         print("P HTML: " + p.html())
 

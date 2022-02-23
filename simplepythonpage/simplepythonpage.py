@@ -76,7 +76,10 @@ class HtmlContainer(HtmlElement):
         if self.get_attr_text():
             attr_text = " " + self.get_attr_text()
 
-        all_text = "<{0}{1}>{2}</{0}>".format(self._container_text, attr_text, self._text)
+        if self._text is None:
+            all_text = ""
+        else:
+            all_text = "<{0}{1}>{2}</{0}>".format(self._container_text, attr_text, self._text)
 
         for item in self.items:
             if isinstance(item, str):
@@ -268,34 +271,34 @@ class PageBasic(object):
         self.write(args)
         self.write_page_contents(args)
 
-    def p(self, text = ""):
+    def p(self, text = None):
         return HtmlContainer("p", text)
 
-    def h1(self, text = ""):
+    def h1(self, text = None):
         return HtmlContainer("h1", text)
 
-    def h2(self, text = ""):
+    def h2(self, text = None):
         return HtmlContainer("h2", text)
 
-    def h3(self, text = ""):
+    def h3(self, text = None):
         return HtmlContainer("h3", text)
 
-    def h4(self, text = ""):
+    def h4(self, text = None):
         return HtmlContainer("h4", text)
 
-    def h5(self, text = ""):
+    def h5(self, text = None):
         return HtmlContainer("h5", text)
 
-    def h6(self, text = ""):
+    def h6(self, text = None):
         return HtmlContainer("h6", text)
 
-    def div(self, text = ""):
+    def div(self, text = None):
         return HtmlContainer("div", text)
 
-    def span(self, text = ""):
+    def span(self, text = None):
         return HtmlContainer("span", text)
 
-    def pre(self, text = ""):
+    def pre(self, text = None):
         return HtmlContainer("pre", text)
 
     def br(self):
