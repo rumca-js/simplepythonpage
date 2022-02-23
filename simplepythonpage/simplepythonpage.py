@@ -1,6 +1,7 @@
 import time
 import argparse
 import urllib
+import cgi
 import importlib
 import logging
 
@@ -56,7 +57,7 @@ class HtmlOneLiner(HtmlElement):
 
 class HtmlContainer(HtmlElement):
 
-    def __init__(self, container_text = "p", text = None, attrs = {}):
+    def __init__(self, container_text = "p", text = "", attrs = {}):
         super().__init__(container_text, text, attrs)
         self.items = []
 
@@ -64,9 +65,6 @@ class HtmlContainer(HtmlElement):
         self.items.append(item)
 
     def insert(self, text):
-        if self._text is None:
-            self._text = ""
-
         if text:
             if isinstance(text, str):
                 self._text += text
@@ -74,21 +72,20 @@ class HtmlContainer(HtmlElement):
                 self._text += text.html()
 
     def html(self):
-        attr_text = self.get_attr_text()
+        attr_text = ""
+        if self.get_attr_text():
+            attr_text = " " + self.get_attr_text()
 
-        if self._text:
-            return "<{0} {1}>{2}</{0}>".format(self._container_text, attr_text, self._text)
-
-        html_text = ""
+        all_text = "<{0}{1}>{2}</{0}>".format(self._container_text, attr_text, self._text)
 
         for item in self.items:
             if isinstance(item, str):
                 item_text = item
             else:
                 item_text = item.html()
-            html_text += "<{0} {1}>{2}</{0}>".format(self._container_text, attr_text, item_text )
+            all_text += "<{0}>{2}</{0}>".format(self._container_text, attr_text, item_text )
 
-        return html_text
+        return all_text
 
 
 class HtmlFormInput(HtmlElement):
@@ -192,6 +189,8 @@ class PageBasic(object):
         self._title = "SimplePythonPageTitle"
         self._header = ""
         self._footer = ""
+        self._method = "GET"
+        self._form = None
 
     def set_title(self, title):
         self._title = title
@@ -199,11 +198,23 @@ class PageBasic(object):
     def set_handler(self, handler):
         self._handler = handler
 
+    def set_method(self, method):
+        self._method = method
+
     def get_path_relative(self):
         return self._handler.get_path_relative()
 
     def get_args(self):
         return self._handler.get_args()
+
+    def get_post_arg(self, key):
+        if not self._form:
+            self._form = cgi.FieldStorage(
+                fp=self._handler.rfile,
+                headers=self._handler.headers,
+                environ={'REQUEST_METHOD': 'POST'}
+            )
+        return self._form.getvalue(key)
 
     def get_client_address(self):
         return self._handler.client_address
@@ -257,34 +268,34 @@ class PageBasic(object):
         self.write(args)
         self.write_page_contents(args)
 
-    def p(self, text = None):
+    def p(self, text = ""):
         return HtmlContainer("p", text)
 
-    def h1(self, text = None):
+    def h1(self, text = ""):
         return HtmlContainer("h1", text)
 
-    def h2(self, text = None):
+    def h2(self, text = ""):
         return HtmlContainer("h2", text)
 
-    def h3(self, text = None):
+    def h3(self, text = ""):
         return HtmlContainer("h3", text)
 
-    def h4(self, text = None):
+    def h4(self, text = ""):
         return HtmlContainer("h4", text)
 
-    def h5(self, text = None):
+    def h5(self, text = ""):
         return HtmlContainer("h5", text)
 
-    def h6(self, text = None):
+    def h6(self, text = ""):
         return HtmlContainer("h6", text)
 
-    def div(self, text = None):
+    def div(self, text = ""):
         return HtmlContainer("div", text)
 
-    def span(self, text = None):
+    def span(self, text = ""):
         return HtmlContainer("span", text)
 
-    def pre(self, text = None):
+    def pre(self, text = ""):
         return HtmlContainer("pre", text)
 
     def br(self):
@@ -365,7 +376,7 @@ class PageBuilder(object):
     def register_page(self, url, page):
         self._pages[url] = page
 
-    def get_page(self):
+    def get_page(self, method):
 
         path = self._handler.get_path_relative()
 
@@ -373,6 +384,7 @@ class PageBuilder(object):
             if path == item:
                 page = self._pages[item]
                 page.set_handler(self._handler)
+                page.set_method(method)
                 return page
 
         else:
@@ -381,14 +393,28 @@ class PageBuilder(object):
 
 class SimplePythonPageServer(BaseHTTPRequestHandler):
 
+    def _set_headers(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+
     def do_GET(self):
         _builder.set_handler(self)
 
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
+        self._set_headers()
 
-        page = _builder.get_page()
+        page = _builder.get_page('GET')
+        if page:
+            page.super_write()
+        else:
+            logging.error("Page not supported: {0}".format(self.get_path_relative() ) )
+
+    def do_POST(self):
+        _builder.set_handler(self)
+
+        self._set_headers()
+
+        page = _builder.get_page('POST')
         if page:
             page.super_write()
         else:
@@ -418,6 +444,10 @@ class SimplePythonPageServer(BaseHTTPRequestHandler):
         return arguments
 
 
+def set_page_builder(builder):
+    global _builder
+    _builder = builder
+
 
 class SimplePythonPageSuperServer():
 
@@ -430,6 +460,9 @@ class SimplePythonPageSuperServer():
 
     def add_close_item(self, closeitem):
         self._close_items.append(closeitem)
+
+    def register_page(self, url, page):
+        _builder.register_page(url, page)
 
     def start_server(self):
 
@@ -461,11 +494,6 @@ class CommandLine(object):
         self.args = self.parser.parse_args()
 
 
-def set_page_builder(builder):
-    global _builder
-    _builder = builder
-
-
 if __name__ == "__main__":        
 
     logging.basicConfig(level=logging.INFO)
@@ -473,10 +501,7 @@ if __name__ == "__main__":
     cmd = CommandLine()
 
     superserver = SimplePythonPageSuperServer(cmd.args.host_name, cmd.args.port)
-
-    builder = PageBuilder()
-    builder.register_page("/download", ExamplePage() )
-    builder.register_page("/download/index.xyz", ExamplePage() )
-    set_page_builder(builder)
+    superserver.register_page("/download", ExamplePage() )
+    superserver.register_page("/download/index.xyz", ExamplePage() )
 
     superserver.start_server()
