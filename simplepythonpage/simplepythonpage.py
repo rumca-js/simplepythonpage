@@ -204,6 +204,9 @@ class PageBasic(object):
     def set_method(self, method):
         self._method = method
 
+    def get_method(self):
+        return self._method
+
     def get_path_relative(self):
         return self._handler.get_path_relative()
 
