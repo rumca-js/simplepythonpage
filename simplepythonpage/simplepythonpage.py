@@ -67,6 +67,9 @@ class HtmlContainer(HtmlElement):
         self.items.append(item)
 
     def insert(self, text):
+        if self._text is None:
+            self._text = ""
+
         if text:
             if isinstance(text, str):
                 self._text += text
