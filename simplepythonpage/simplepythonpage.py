@@ -187,6 +187,9 @@ class PageBasic(object):
     def set_handler(self, handler):
         self._handler = handler
 
+        # clean things, if page is opened again we need to refetch data
+        self._form = None
+
     def set_method(self, method):
         self._method = method
 
