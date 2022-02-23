@@ -83,7 +83,7 @@ class HtmlContainer(HtmlElement):
                 item_text = item
             else:
                 item_text = item.html()
-            all_text += "<{0}>{2}</{0}>".format(self._container_text, attr_text, item_text )
+            all_text += "<{0}{1}>{2}</{0}>".format(self._container_text, attr_text, item_text )
 
         return all_text
 
