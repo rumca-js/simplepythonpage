@@ -6,6 +6,18 @@ import logging
 
 import simplepythonpage
 
+class PageTest(simplepythonpage.PageBasic):
+
+    def __init__(self):
+        self.strings = ""
+
+    def write_string(self, string):
+        self.strings += string
+
+    def write(self, args):
+        self.set_title("Test Page Title")
+        self.set_page_contents("Test Page Contents")
+
 
 class TestHtmlElement(unittest.TestCase):
 
@@ -95,6 +107,16 @@ class TestHtmlElement(unittest.TestCase):
         print("f HTML: " + f.html())
 
         self.assertTrue(f.html() == '<form action="http://example.com" method="POST"><label for="url">Download link:</label><input type="text" id="url" name="url"><input type="submit" value="Download"></form>')
+
+    def test_page_basic_title(self):
+
+        page = PageTest()
+        page.write({})
+        page.write_page_contents()
+
+        self.assertTrue( len(page.strings) > 0)
+        self.assertTrue(page.strings.find("<title>Test Page Title</title>") >= 0)
+        self.assertTrue(page.strings.find("Test Page Contents") >= 0)
 
 
 if __name__ == '__main__':

@@ -179,8 +179,6 @@ class PageBasic(object):
     def __init__(self, handler = None):
         self._handler = handler
         self._title = "SimplePythonPageTitle"
-        self._header = ""
-        self._footer = ""
         self._method = "GET"
         self._form = None
 
@@ -232,33 +230,17 @@ class PageBasic(object):
     def set_page_contents(self, page_contents):
         self._page_contents = page_contents
 
-    def set_header(self, header):
-        self._header = header
-
-    def set_footer(self, footer):
-        self._header = header
-
     def write(self, args = None):
         self.set_page_contents("Default document")
 
     def write_page_contents(self, args = None):
-        if self._header == "":
-            self._header = """
+        complete_text = """
             <html><head><title>{0}</title></head>
-            <body>
-            """.format(self._title)
+            <body>{1}
+            </body>
+            </html>""".format(self._title, self.get_page_contents())
 
-        if self._page_contents == "":
-            self.set_page_contents("Default document")
-
-        if self._footer == "":
-            self._footer = """
-            </body></html>
-            """
-
-        self.write_string(self._header)
-        self.write_string(self.get_page_contents() )
-        self.write_string(self._footer)
+        self.write_string(complete_text)
 
     def super_write(self):
         args = self.get_args()
