@@ -235,7 +235,11 @@ class PageBasic(object):
 
     def write_page_contents(self, args = None):
         complete_text = """
-            <html><head><title>{0}</title></head>
+            <html>
+            <head>
+               <title>{0}</title>
+               <meta charset="UTF-8">
+            </head>
             <body>{1}
             </body>
             </html>""".format(self._title, self.get_page_contents())
