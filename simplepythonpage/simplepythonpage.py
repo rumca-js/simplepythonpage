@@ -112,6 +112,32 @@ class HtmlFormInput(HtmlOneLiner):
             self.set_attr("size", len(default_value))
 
 
+class HtmlFormSelect(HtmlContainer):
+
+    def __init__(self, aid = None):
+        self.options = []
+        super().__init__("select")
+
+        if aid:
+            self.set_attr("id", aid)
+            self.set_attr("name", aid)
+
+    def add_option(self, aValueId, aValueText):
+        c = HtmlContainer("option")
+        c.set_attr("value", aValueId)
+        c.set_text(aValueText)
+
+        self.options.append(c)
+
+    def html(self):
+        input_html = ""
+        for aoption in self.options:
+            input_html += aoption.html()
+
+        self.set_text(input_html)
+        return super().html()
+
+
 class HtmlForm(HtmlContainer):
 
     def __init__(self):
@@ -310,6 +336,9 @@ class PageBasic(object):
 
     def form_input(self, itype = None, iid = None, default_value = None):
         return HtmlFormInput(itype, iid, default_value)
+
+    def form_select(self, aid):
+        return HtmlFormSelect(aid)
 
     def form_input_submit(self, text = None):
         ainput = HtmlFormInput()
