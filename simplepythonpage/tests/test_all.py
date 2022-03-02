@@ -126,6 +126,24 @@ class TestHtmlElement(unittest.TestCase):
 
         self.assertTrue(f.html() == '<form action="http://example.com" method="POST"><select id="car" name="car"><option value="volvo">Volvo</option><option value="fiat">Fiat</option></select><input type="submit" value="Download"></form>')
 
+    def test_page_form_options(self):
+        page = simplepythonpage.PageBasic()
+        f = page.form()
+        f.set_attr("action", "http://example.com")
+        f.set_attr("method", "POST")
+
+        s = page.form_select("car")
+        s.add_option("volvo", "Volvo")
+        s.add_option("fiat", "Fiat", True)
+
+        f.add_input(s)
+
+        f.add_input( page.form_input_submit("Download"))
+
+        print("f HTML: " + f.html())
+
+        self.assertTrue(f.html() == '<form action="http://example.com" method="POST"><select id="car" name="car"><option value="volvo">Volvo</option><option value="fiat" selected>Fiat</option></select><input type="submit" value="Download"></form>')
+
     def test_page_basic_title(self):
 
         page = PageTest()

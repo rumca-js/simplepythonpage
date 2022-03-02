@@ -34,7 +34,12 @@ class HtmlElement(object):
             attr = self._attrs[attr_key]
             if attr_text != "":
                 attr_text += " "
-            attr_text += '{0}="{1}"'.format(attr_key, attr)
+
+            if attr is not None:
+                attr_text += '{0}="{1}"'.format(attr_key, attr)
+            else:
+                attr_text += '{0}'.format(attr_key, attr)
+
         return attr_text
 
     def set_text(self, text):
@@ -122,10 +127,13 @@ class HtmlFormSelect(HtmlContainer):
             self.set_attr("id", aid)
             self.set_attr("name", aid)
 
-    def add_option(self, aValueId, aValueText):
+    def add_option(self, aValueId, aValueText, selected = False):
         c = HtmlContainer("option")
         c.set_attr("value", aValueId)
         c.set_text(aValueText)
+
+        if selected:
+            c.set_attr("selected", None)
 
         self.options.append(c)
 
