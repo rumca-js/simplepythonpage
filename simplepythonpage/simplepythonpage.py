@@ -281,6 +281,7 @@ class PageBasic(object):
             <head>
                <title>{0}</title>
                <meta charset="{1}">
+               <meta name="viewport" content="width=device-width, initial-scale=1">
                <style>{2}</style>
             </head>
             <body>{3}</body>
