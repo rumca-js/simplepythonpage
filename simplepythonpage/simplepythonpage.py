@@ -368,6 +368,11 @@ class PageBasic(object):
     def form(self):
         return HtmlForm()
 
+    def button(self, text):
+        b = HtmlContainer("button")
+        b.set_text(text)
+        return b
+
     def textarea(self, name, rows = 5, cols = 5):
         c = HtmlContainer("textarea")
         c.set_attr("name", name)
