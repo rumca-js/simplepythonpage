@@ -9,6 +9,7 @@ import simplepythonpage
 class PageTest(simplepythonpage.PageBasic):
 
     def __init__(self):
+        super().__init__()
         self.strings = ""
 
     def write_string(self, string):

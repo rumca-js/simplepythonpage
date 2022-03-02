@@ -215,6 +215,8 @@ class PageBasic(object):
         self._title = "SimplePythonPageTitle"
         self._method = "GET"
         self._form = None
+        self._charset = 'utf-8'
+        self._style = ""
 
     def set_title(self, title):
         self._title = title
@@ -224,6 +226,12 @@ class PageBasic(object):
 
         # clean things, if page is opened again we need to refetch data
         self._form = None
+
+    def set_charset(self, charset):
+        self._charset = charset
+
+    def set_style(self, style):
+        self._style = style
 
     def set_method(self, method):
         self._method = method
@@ -272,11 +280,11 @@ class PageBasic(object):
             <html>
             <head>
                <title>{0}</title>
-               <meta charset="UTF-8">
+               <meta charset="{1}">
+               <style>{2}</style>
             </head>
-            <body>{1}
-            </body>
-            </html>""".format(self._title, self.get_page_contents())
+            <body>{3}</body>
+            </html>""".format(self._title, self._charset, self._style, self.get_page_contents())
 
         self.write_string(complete_text)
 
