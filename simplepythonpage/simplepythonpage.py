@@ -157,12 +157,15 @@ class HtmlForm(HtmlContainer):
         self._inputs.append(ainput)
 
     def html(self):
-        input_html = ""
-        for ainput in self._inputs:
-            input_html += ainput.html()
+        if len(self._inputs) > 0:
+            input_html = ""
+            for ainput in self._inputs:
+                input_html += ainput.html()
 
-        self.set_text(input_html)
-        return super().html()
+            self.set_text(input_html)
+            return super().html()
+        else:
+            return super().html()
 
 
 class HtmlTable(HtmlElement):
