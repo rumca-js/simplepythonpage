@@ -103,7 +103,7 @@ class HtmlContainer(HtmlElement):
 
 class HtmlFormInput(HtmlOneLiner):
 
-    def __init__(self, atype = None, aid = None, default_value = None):
+    def __init__(self, atype = None, aid = None, default_value = None, default_size = None):
         super().__init__("input")
 
         if atype:
@@ -114,7 +114,12 @@ class HtmlFormInput(HtmlOneLiner):
 
         if default_value:
             self.set_attr("value", default_value)
-            self.set_attr("size", len(default_value))
+
+        if default_size or default_value:
+            if default_size:
+                self.set_attr("size", default_size)
+            else:
+                self.set_attr("size", len(default_value))
 
 
 class HtmlFormSelect(HtmlContainer):
@@ -354,8 +359,8 @@ class PageBasic(object):
         cont.set_text(title)
         return cont
 
-    def form_input(self, itype = None, iid = None, default_value = None):
-        return HtmlFormInput(itype, iid, default_value)
+    def form_input(self, itype = None, iid = None, default_value = None, default_size = None):
+        return HtmlFormInput(itype, iid, default_value, default_size)
 
     def form_select(self, aid):
         return HtmlFormSelect(aid)
