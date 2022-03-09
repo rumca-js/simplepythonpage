@@ -449,6 +449,8 @@ class SimplePythonPageServer(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        logging.info("Request:\t{0}\t{1}\t{2}".format("GET", self.client_address, self.get_path_relative()))
+
         _builder.set_handler(self)
 
         self._set_headers()
@@ -460,6 +462,8 @@ class SimplePythonPageServer(BaseHTTPRequestHandler):
             logging.error("Page not supported: {0}".format(self.get_path_relative() ) )
 
     def do_POST(self):
+        logging.info("Request:\t{0}\t{1}\t{2}".format("POST", self.client_address, self.get_path_relative()))
+
         _builder.set_handler(self)
 
         self._set_headers()
