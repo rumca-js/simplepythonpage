@@ -7,6 +7,8 @@ import simplepythonpage
 
 """
 https://docs.aiohttp.org/en/stable/web_quickstart.html
+
+https://docs.aiohttp.org/en/stable/web_reference.html
 """
 
 
@@ -18,12 +20,15 @@ class PageBuilder(object):
     def register_page(self, url, page):
         self._pages[url] = page
 
-    def get_page(self, path, method):
+    def get_page(self, path, method, request):
         for item in self._pages:
             if path == item:
                 page = self._pages[item]()
                 page.set_path(path)
                 page.set_method(method)
+                page.set_args(request.query)
+                page.set_client_ip(request.remote)
+
                 return page
 
         else:
@@ -35,18 +40,10 @@ builder = PageBuilder()
 
 async def handle(request):
 
-    name = request.match_info.get('name', "Anonymous")
+    page = builder.get_page(request.path, request.method, request)
+    page_text = page.write_all(page.get_args())
 
-    #request.method == 'POST':
-
-    #page = builder.get_page(request.path, request.method)
-    page = builder.get_page(request.path, request.method)
-    args = {}
-    page_text = page.write(args)
-
-    text = "Hello, " + name + request.method + " " + request.path + " " + page_text
-
-    return web.Response(text=text)
+    return web.Response(text=page_text, content_type="text/html")
 
 
 class IOSimplePythonPageSuperServer(object):
@@ -56,6 +53,7 @@ class IOSimplePythonPageSuperServer(object):
         self._port = port
 
         self._webServer = web.Application()
+        self._close_items = []
 
     def register_page(self, route, page):
         builder.register_page(route, page)
@@ -64,7 +62,19 @@ class IOSimplePythonPageSuperServer(object):
                                     web.post(route, handle)])
 
     def start_server(self):
-        web.run_app(self._webServer)
+        try:
+            web.run_app(self._webServer, host = self._host_name, port = self._port)
+        except Exception as E:
+            print(str(E))
+
+    def add_close_item(self, closeitem):
+        self._close_items.append(closeitem)
+
+    def close(self):
+        logging.info("Closing")
+
+        for item in self._close_items:
+            item.close()
 
 
 class ExamplePage(object):

@@ -334,15 +334,10 @@ class PageBasic(HtmlEncapsulaterObject):
         self._form = None
         self._charset = 'utf-8'
         self._style = ""
+        self._args = {}
 
     def set_title(self, title):
         self._title = title
-
-    def set_handler(self, handler):
-        self._handler = handler
-
-        # clean things, if page is opened again we need to refetch data
-        self._form = None
 
     def set_charset(self, charset):
         self._charset = charset
@@ -356,29 +351,38 @@ class PageBasic(HtmlEncapsulaterObject):
     def get_method(self):
         return self._method
 
-    def get_path_relative(self):
-        return self._handler.get_path_relative()
+    def get_path(self):
+        return self._path
+
+    def set_path(self, path):
+        self._path = path
 
     def get_args(self):
-        return self._handler.get_args()
+        return self._args
 
-    def get_post_arg(self, key):
-        if not self._form:
-            self._form = cgi.FieldStorage(
-                fp=self._handler.rfile,
-                headers=self._handler.headers,
-                environ={'REQUEST_METHOD': 'POST'}
-            )
-        return self._form.getvalue(key)
+    def set_args(self, args):
+        self._args = args
 
-    def get_client_address(self):
-        return self._handler.client_address
+    #def get_post_arg(self, key):
+    #    if not self._form:
+    #        self._form = cgi.FieldStorage(
+    #            fp=self._handler.rfile,
+    #            headers=self._handler.headers,
+    #            environ={'REQUEST_METHOD': 'POST'}
+    #        )
+    #    return self._form.getvalue(key)
+
+    def get_client_ip(self):
+        return self._client_ip
+
+    def set_client_ip(self, client_ip):
+        self._client_ip = client_ip
 
     def get_arg(self, arg):
-        return self._handler.get_args()[arg]
+        return self._args[arg]
 
     def has_args(self):
-        return len(self._handler.get_args()) > 0
+        return len(self._args) > 0
 
     def write_string(self, string):
         self._handler.wfile.write(bytes(string, "utf-8"))
@@ -392,7 +396,9 @@ class PageBasic(HtmlEncapsulaterObject):
     def write(self, args = None):
         return "Default document"
 
-    def write_page_contents(self, args = None):
+    def write_all(self, args = None):
+        text = self.write(args)
+
         complete_text = """
             <html>
             <head>
@@ -402,16 +408,14 @@ class PageBasic(HtmlEncapsulaterObject):
                <style>{2}</style>
             </head>
             <body>{3}</body>
-            </html>""".format(self._title, self._charset, self._style, self.get_page_contents())
-
-        self.write_string(complete_text)
+            </html>""".format(self._title, self._charset, self._style, text)
+        return complete_text
 
     def super_write(self):
         args = self.get_args()
+        complete_text = self.write_all(args)
 
-        text = self.write(args)
-        self.set_page_contents(text)
-        self.write_page_contents(args)
+        self.write_string(complete_text)
 
 
 class ExamplePage(PageBasic):
@@ -438,9 +442,12 @@ class PageBuilder(object):
 
         for item in self._pages:
             if path == item:
-                page = self._pages[item]
+                page = self._pages[item]()
+                page.set_path(path)
                 page.set_handler(self._handler)
                 page.set_method(method)
+                page.set_args(self._handler.get_args())
+                page.set_client_ip(self._handler.client_address[0])
                 return page
 
         else:
@@ -541,6 +548,9 @@ class SimplePythonPageSuperServer():
         except KeyboardInterrupt:
             pass
 
+        self.close()
+
+    def close(self):
         self._webServer.server_close()
 
         for item in self._close_items:
