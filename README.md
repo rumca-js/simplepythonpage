@@ -15,6 +15,16 @@ How to use:
 
 Each page should implement PageBasic object.
 
+# IO Server
+
+SimplePythonPageSuperServer uses python commont HTTPServer, which is synchronous.
+Each request is handled synchronically.
+
+To have asynchronous functionality 'ioserver' was created. Requires some pip packages.
+
+Details, and installation are provided by:
+ - [docs.aiohttp.org](https://docs.aiohttp.org/en/stable/)
+
 # Example use
 
 ```
