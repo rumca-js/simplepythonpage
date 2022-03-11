@@ -8,6 +8,8 @@ import logging
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
+__version__ = '1.0.0'
+
 
 class HtmlElement(object):
 
@@ -216,7 +218,114 @@ class HtmlBackForm(HtmlForm):
         self.add_input(HtmlFormInput())
 
 
-class PageBasic(object):
+class HtmlEncapsulaterObject(object):
+
+    def p(self, text = None):
+        return HtmlContainer("p", text)
+
+    def h1(self, text = None):
+        return HtmlContainer("h1", text)
+
+    def h2(self, text = None):
+        return HtmlContainer("h2", text)
+
+    def h3(self, text = None):
+        return HtmlContainer("h3", text)
+
+    def h4(self, text = None):
+        return HtmlContainer("h4", text)
+
+    def h5(self, text = None):
+        return HtmlContainer("h5", text)
+
+    def h6(self, text = None):
+        return HtmlContainer("h6", text)
+
+    def div(self, text = None):
+        return HtmlContainer("div", text)
+
+    def span(self, text = None):
+        return HtmlContainer("span", text)
+
+    def pre(self, text = None):
+        return HtmlContainer("pre", text)
+
+    def br(self):
+        hto = HtmlOneLiner("br")
+        return hto
+
+    def hr(self):
+        hto = HtmlOneLiner("hr /")
+        return hto
+
+    def table(self, table, with_header = False):
+        return HtmlTable(table, with_header)
+
+    def img(self, src, width = None, height = None):
+        hto = HtmlOneLiner("img")
+        hto.set_attr("src", src)
+        if width:
+            hto.set_attr("width", width)
+        if height:
+            hto.set_attr("height", height)
+        return hto
+
+    def link(self, title, dst):
+        cont = HtmlContainer("a")
+        cont.set_attr("href", dst)
+        cont.set_text(title)
+        return cont
+
+    def form_input(self, itype = None, iid = None, default_value = None, default_size = None):
+        return HtmlFormInput(itype, iid, default_value, default_size)
+
+    def form_select(self, aid):
+        return HtmlFormSelect(aid)
+
+    def form_input_submit(self, text = None):
+        ainput = HtmlFormInput()
+        ainput.set_attr("type","submit")
+        if not text:
+            ainput.set_attr("value","Submit")
+        else:
+            ainput.set_attr("value", text)
+        return ainput
+
+    def form(self):
+        return HtmlForm()
+
+    def button(self, text):
+        b = HtmlContainer("button")
+        b.set_text(text)
+        return b
+
+    def textarea(self, name, rows = 5, cols = 5):
+        c = HtmlContainer("textarea")
+        c.set_attr("name", name)
+        c.set_attr("rows", rows)
+        c.set_attr("cols", cols)
+        return c
+
+    def form_go_back(self):
+
+        form = self.form()
+        ainput = HtmlFormInput()
+        ainput.add_key("type","button")
+        ainput.add_key("value","Go back!")
+        ainput.add_key("onclick","history.back()")
+
+        form.add_input(ainput)
+
+        return form
+
+    def label(self, text, afor = None):
+        cont = HtmlContainer("label")
+        cont.set_attr("for", afor)
+        cont.set_text(text)
+        return cont
+
+
+class PageBasic(HtmlEncapsulaterObject):
 
     def __init__(self, handler = None):
         self._handler = handler
@@ -303,109 +412,6 @@ class PageBasic(object):
         self.write(args)
         self.write_page_contents(args)
 
-    def p(self, text = None):
-        return HtmlContainer("p", text)
-
-    def h1(self, text = None):
-        return HtmlContainer("h1", text)
-
-    def h2(self, text = None):
-        return HtmlContainer("h2", text)
-
-    def h3(self, text = None):
-        return HtmlContainer("h3", text)
-
-    def h4(self, text = None):
-        return HtmlContainer("h4", text)
-
-    def h5(self, text = None):
-        return HtmlContainer("h5", text)
-
-    def h6(self, text = None):
-        return HtmlContainer("h6", text)
-
-    def div(self, text = None):
-        return HtmlContainer("div", text)
-
-    def span(self, text = None):
-        return HtmlContainer("span", text)
-
-    def pre(self, text = None):
-        return HtmlContainer("pre", text)
-
-    def br(self):
-        hto = HtmlOneLiner("br")
-        return hto
-
-    def hr(self):
-        hto = HtmlOneLiner("hr")
-        return hto
-
-    def table(self, table, with_header = False):
-        return HtmlTable(table, with_header)
-
-    def img(self, src, width = None, height = None):
-        hto = HtmlOneLiner("img")
-        hto.set_attr("src", src)
-        if width:
-            hto.set_attr("width", width)
-        if height:
-            hto.set_attr("height", height)
-        return hto
-
-    def link(self, title, dst):
-        cont = HtmlContainer("a")
-        cont.set_attr("href", dst)
-        cont.set_text(title)
-        return cont
-
-    def form_input(self, itype = None, iid = None, default_value = None, default_size = None):
-        return HtmlFormInput(itype, iid, default_value, default_size)
-
-    def form_select(self, aid):
-        return HtmlFormSelect(aid)
-
-    def form_input_submit(self, text = None):
-        ainput = HtmlFormInput()
-        ainput.set_attr("type","submit")
-        if not text:
-            ainput.set_attr("value","Submit")
-        else:
-            ainput.set_attr("value", text)
-        return ainput
-
-    def form(self):
-        return HtmlForm()
-
-    def button(self, text):
-        b = HtmlContainer("button")
-        b.set_text(text)
-        return b
-
-    def textarea(self, name, rows = 5, cols = 5):
-        c = HtmlContainer("textarea")
-        c.set_attr("name", name)
-        c.set_attr("rows", rows)
-        c.set_attr("cols", cols)
-        return c
-
-    def form_go_back(self):
-
-        form = self.form()
-        ainput = HtmlFormInput()
-        ainput.add_key("type","button")
-        ainput.add_key("value","Go back!")
-        ainput.add_key("onclick","history.back()")
-
-        form.add_input(ainput)
-
-        return form
-
-    def label(self, text, afor = None):
-        cont = HtmlContainer("label")
-        cont.set_attr("for", afor)
-        cont.set_text(text)
-        return cont
 
 
 class ExamplePage(PageBasic):
