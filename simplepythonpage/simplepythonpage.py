@@ -8,7 +8,7 @@ import logging
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 
 class HtmlElement(object):
@@ -390,7 +390,7 @@ class PageBasic(HtmlEncapsulaterObject):
         self._page_contents = page_contents
 
     def write(self, args = None):
-        self.set_page_contents("Default document")
+        return "Default document"
 
     def write_page_contents(self, args = None):
         complete_text = """
@@ -409,9 +409,9 @@ class PageBasic(HtmlEncapsulaterObject):
     def super_write(self):
         args = self.get_args()
 
-        self.write(args)
+        text = self.write(args)
+        self.set_page_contents(text)
         self.write_page_contents(args)
-
 
 
 class ExamplePage(PageBasic):
