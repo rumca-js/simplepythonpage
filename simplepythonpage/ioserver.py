@@ -46,6 +46,11 @@ async def handle(request):
     return web.Response(text=page_text, content_type="text/html")
 
 
+async def default_handle(request):
+    page_text = 'Error'
+    return web.Response(text=page_text, content_type="text/html")
+
+
 class IOSimplePythonPageSuperServer(object):
 
     def __init__(self, host_name, port):
@@ -63,6 +68,8 @@ class IOSimplePythonPageSuperServer(object):
 
     def start_server(self):
         try:
+            self._webServer.add_routes([web.get('/{tail:.*}', default_handle)])
+
             web.run_app(self._webServer, host = self._host_name, port = self._port)
         except Exception as E:
             print(str(E))
