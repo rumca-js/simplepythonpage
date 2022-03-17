@@ -324,6 +324,11 @@ class HtmlEncapsulaterObject(object):
         cont.set_text(text)
         return cont
 
+    def iframe(self, src):
+        cont = HtmlContainer("iframe")
+        cont.set_attr("src", src)
+        return cont
+
 
 class PageBasic(HtmlEncapsulaterObject):
 
