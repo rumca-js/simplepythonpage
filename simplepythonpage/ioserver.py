@@ -1,5 +1,7 @@
 import logging
 import argparse
+from pathlib import Path
+
 from aiohttp import web
 
 import simplepythonpage
@@ -15,7 +17,19 @@ https://docs.aiohttp.org/en/stable/web_reference.html
 class DefaultPage(simplepythonpage.PageBasic):
 
     def write(self, args):
-        return "Test"
+        text = ""
+
+        path = Path(self.get_path()[1:])
+        file_name = self.get_path()[1:]
+
+        if path.is_file():
+            with open(file_name, encoding='utf-8') as fh:
+                data = fh.read()
+                text = data
+        else:
+            text = "You're lost!"
+
+        return text
 
 
 class ExamplePage(simplepythonpage.PageBasic):
