@@ -330,6 +330,22 @@ class HtmlEncapsulaterObject(object):
         cont.set_attr("src", src)
         return cont
 
+    def script(self, src):
+        cont = HtmlContainer("script")
+        cont.set_attr("src", src)
+        return cont
+
+    def css_link(self, src):
+        cont = HtmlContainer("link")
+        cont.set_attr("href", src)
+        return cont
+
+    def css_style(self, src):
+        cont = HtmlContainer("style")
+        cont.set_attr("type", "text/css")
+        cont.set_attr("media", "screen")
+        return cont
+
 
 class PageBasic(HtmlEncapsulaterObject):
 
