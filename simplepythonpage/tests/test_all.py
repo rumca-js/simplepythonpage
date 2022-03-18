@@ -6,19 +6,6 @@ import logging
 
 import simplepythonpage
 
-class PageTest(simplepythonpage.PageBasic):
-
-    def __init__(self):
-        super().__init__()
-        self.strings = ""
-
-    def write_string(self, string):
-        self.strings += string
-
-    def write(self, args):
-        self.set_title("Test Page Title")
-        self.set_page_contents("Test Page Contents")
-
 
 class TestHtmlElement(unittest.TestCase):
 
@@ -29,7 +16,7 @@ class TestHtmlElement(unittest.TestCase):
         pass
 
     def test_page_basic_p_empty(self):
-        page = simplepythonpage.PageBasic()
+        page = simplepythonpage.HtmlEncapsulaterObject()
         p = page.p()
 
         print("P HTML: " + p.html())
@@ -37,7 +24,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(p.html() == "")
 
     def test_page_basic_p(self):
-        page = simplepythonpage.PageBasic()
+        page = simplepythonpage.HtmlEncapsulaterObject()
         p = page.p("")
 
         print("P HTML: " + p.html())
@@ -45,7 +32,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(p.html() == "<p></p>")
 
     def test_page_basic_p_text(self):
-        page = simplepythonpage.PageBasic()
+        page = simplepythonpage.HtmlEncapsulaterObject()
         p = page.p("test_text")
 
         print("P HTML: " + p.html())
@@ -53,7 +40,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(p.html() == "<p>test_text</p>")
 
     def test_page_basic_p_attr(self):
-        page = simplepythonpage.PageBasic()
+        page = simplepythonpage.HtmlEncapsulaterObject()
         p = page.p("test_text")
         p.set_attr("id", "attr_test")
 
@@ -62,7 +49,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(p.html() == '<p id="attr_test">test_text</p>')
 
     def test_page_basic_p_insert(self):
-        page = simplepythonpage.PageBasic()
+        page = simplepythonpage.HtmlEncapsulaterObject()
         p = page.p("test_text")
         p.insert(",new_text")
 
@@ -71,7 +58,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(p.html() == '<p>test_text,new_text</p>')
 
     def test_page_basic_p_push(self):
-        page = simplepythonpage.PageBasic()
+        page = simplepythonpage.HtmlEncapsulaterObject()
         p = page.p("test_text")
         p.push(",new_text")
 
@@ -81,7 +68,7 @@ class TestHtmlElement(unittest.TestCase):
 
     def test_page_basic_form_input(self):
 
-        page = simplepythonpage.PageBasic()
+        page = simplepythonpage.HtmlEncapsulaterObject()
         f = page.form_input("text", "url")
 
         print("f HTML: " + f.html())
@@ -89,14 +76,14 @@ class TestHtmlElement(unittest.TestCase):
 
     def test_page_basic_form_input_default_value(self):
 
-        page = simplepythonpage.PageBasic()
+        page = simplepythonpage.HtmlEncapsulaterObject()
         f = page.form_input("text", "url", "deeeeedbeaaaf")
 
         print("f HTML: " + f.html())
         self.assertTrue(f.html() == '<input type="text" id="url" name="url" value="deeeeedbeaaaf" size="13">')
 
     def test_page_basic_3_form_inputs(self):
-        page = simplepythonpage.PageBasic()
+        page = simplepythonpage.HtmlEncapsulaterObject()
         f = page.form()
         f.set_attr("action", "http://example.com")
         f.set_attr("method", "POST")
@@ -110,7 +97,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(f.html() == '<form action="http://example.com" method="POST"><label for="url">Download link:</label><input type="text" id="url" name="url"><input type="submit" value="Download"></form>')
 
     def test_page_form_options(self):
-        page = simplepythonpage.PageBasic()
+        page = simplepythonpage.HtmlEncapsulaterObject()
         f = page.form()
         f.set_attr("action", "http://example.com")
         f.set_attr("method", "POST")
@@ -128,7 +115,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(f.html() == '<form action="http://example.com" method="POST"><select id="car" name="car"><option value="volvo">Volvo</option><option value="fiat">Fiat</option></select><input type="submit" value="Download"></form>')
 
     def test_page_form_options(self):
-        page = simplepythonpage.PageBasic()
+        page = simplepythonpage.HtmlEncapsulaterObject()
         f = page.form()
         f.set_attr("action", "http://example.com")
         f.set_attr("method", "POST")
@@ -145,15 +132,77 @@ class TestHtmlElement(unittest.TestCase):
 
         self.assertTrue(f.html() == '<form action="http://example.com" method="POST"><select id="car" name="car"><option value="volvo">Volvo</option><option value="fiat" selected>Fiat</option></select><input type="submit" value="Download"></form>')
 
+
+class PageTest(simplepythonpage.PageBasic):
+
+    def __init__(self):
+        super().__init__()
+        self.strings = ""
+
+    def write_string(self, string):
+        self.strings += string
+
+    def write(self, args):
+        self.set_title("Test Page Title")
+        return "Test Page Contents"
+
+
+class TestHtmlPage(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_page_basic_meta(self):
+
+        page = PageTest()
+        text = page.write_all({})
+        self.assertTrue(text.find("<meta charset") > 0)
+
     def test_page_basic_title(self):
 
         page = PageTest()
-        page.write({})
-        page.write_page_contents()
+        text = page.write_all({})
 
-        self.assertTrue( len(page.strings) > 0)
-        self.assertTrue(page.strings.find("<title>Test Page Title</title>") >= 0)
-        self.assertTrue(page.strings.find("Test Page Contents") >= 0)
+        self.assertTrue( len(text) > 0)
+        self.assertTrue(text.find("<title>Test Page Title</title>") >= 0)
+
+    def test_page_content_type_html(self):
+
+        page = PageTest()
+        self.assertTrue(page.get_charset().toLower() == "utf-8")
+
+    def test_page_content_type_html(self):
+
+        page = PageTest()
+        page.set_method("GET")
+        page.set_path("download/file.html")
+        self.assertTrue(page.get_content_type() == "text/html")
+
+    def test_page_content_type_htm(self):
+
+        page = PageTest()
+        page.set_method("GET")
+        page.set_path("download/file.htm")
+        self.assertTrue(page.get_content_type() == "text/html")
+
+    def test_page_content_type_js(self):
+
+        page = PageTest()
+        page.set_method("GET")
+        page.set_path("download/file.js")
+        self.assertTrue(page.get_content_type() == "text/javascript")
+
+    def test_page_content_type_css(self):
+
+        page = PageTest()
+        page.set_method("GET")
+        page.set_path("download/file.css")
+        self.assertTrue(page.get_content_type() == "text/css")
+
+
 
 
 if __name__ == '__main__':

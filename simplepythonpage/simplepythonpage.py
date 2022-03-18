@@ -2,6 +2,7 @@ import time
 import argparse
 import urllib
 import cgi
+import os
 import importlib
 import logging
 
@@ -334,18 +335,38 @@ class PageBasic(HtmlEncapsulaterObject):
 
     def __init__(self, handler = None):
         self._handler = handler
-        self._title = "SimplePythonPageTitle"
+        self._title = "No Title"
         self._method = "GET"
         self._form = None
         self._charset = 'utf-8'
         self._style = ""
+        self._path = ""
         self._args = {}
+
+    def get_content_type(self):
+        mapping = {
+          ".html" : "text/html",
+          ".htm"  : "text/html",
+          ".js"   : "text/javascript",
+          ".css"  : "text/css",
+        }
+
+        sp = os.path.splitext(self._path)
+        if len(sp) > 1:
+            for key in mapping:
+                if sp[1] == key:
+                    return mapping[key]
+
+        return "text/html"
 
     def set_title(self, title):
         self._title = title
 
     def set_charset(self, charset):
         self._charset = charset
+
+    def get_charset(self, charset):
+        return self._charset
 
     def set_style(self, style):
         self._style = style

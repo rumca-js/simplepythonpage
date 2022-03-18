@@ -12,27 +12,62 @@ https://docs.aiohttp.org/en/stable/web_reference.html
 """
 
 
+class DefaultPage(simplepythonpage.PageBasic):
+
+    def write(self, args):
+        return "Test"
+
+
+class ExamplePage(simplepythonpage.PageBasic):
+
+    def write(self, args):
+        return "Example page"
+
+    def set_path(self, path):
+        pass
+
+    def set_method(self, method):
+        pass
+
+    def set_reference(self, aobj):
+        pass
+
+
 class PageBuilder(object):
 
     def __init__(self):
         self._pages = {}
+        self._default_page = DefaultPage
 
     def register_page(self, url, page):
         self._pages[url] = page
+
+    def init_page(self, page, path, method, request):
+        page.set_path(path)
+        page.set_method(method)
+        page.set_args(request.query)
+        page.set_client_ip(request.remote)
+        return page
 
     def get_page(self, path, method, request):
         for item in self._pages:
             if path == item:
                 page = self._pages[item]()
-                page.set_path(path)
-                page.set_method(method)
-                page.set_args(request.query)
-                page.set_client_ip(request.remote)
+
+                self.init_page(page, path, method, request)
 
                 return page
 
         else:
             return None
+
+    def get_default_page(self, path, method, request):
+        page = self._default_page()
+        self.init_page(page, path, method, request)
+        return page
+
+    def set_default_page(self, page_handler):
+        self._default_page = page_handler
 
 
 builder = PageBuilder()
@@ -43,12 +78,14 @@ async def handle(request):
     page = builder.get_page(request.path, request.method, request)
     page_text = page.write_all(page.get_args())
 
-    return web.Response(text=page_text, content_type="text/html")
+    return web.Response(text=page_text, content_type=page.get_content_type() )
 
 
 async def default_handle(request):
-    page_text = 'Error'
-    return web.Response(text=page_text, content_type="text/html")
+    page = builder.get_default_page(request.path, request.method, request)
+    page_text = page.write_all(page.get_args())
+
+    return web.Response(text=page_text, content_type=page.get_content_type() )
 
 
 class IOSimplePythonPageSuperServer(object):
@@ -59,6 +96,7 @@ class IOSimplePythonPageSuperServer(object):
 
         self._webServer = web.Application()
         self._close_items = []
+        self._register_default_page = False
 
     def register_page(self, route, page):
         builder.register_page(route, page)
@@ -66,9 +104,14 @@ class IOSimplePythonPageSuperServer(object):
         self._webServer.add_routes([web.get(route, handle),
                                     web.post(route, handle)])
 
+    def set_default_page(self, page):
+        builder.set_default_page(page)
+        self._register_default_page = True
+
     def start_server(self):
         try:
-            self._webServer.add_routes([web.get('/{tail:.*}', default_handle)])
+            if self._register_default_page:
+                self._webServer.add_routes([web.get('/{tail:.*}', default_handle)])
 
             web.run_app(self._webServer, host = self._host_name, port = self._port)
         except Exception as E:
@@ -84,33 +127,19 @@ class IOSimplePythonPageSuperServer(object):
             item.close()
 
 
-class ExamplePage(object):
-    pass
-
-    def write(self, args):
-        return "Example page"
-
-    def set_path(self, path):
-        pass
-
-    def set_method(self, method):
-        pass
-
-    def set_reference(self, aobj):
-        pass
-
-
 class CommandLine(object):
 
     def __init__(self):
         self.parser = argparse.ArgumentParser(description='Download server')
         self.parser.add_argument('-H', '--host-name', dest='host_name', default = 'localhost', help = "Host Name")
         self.parser.add_argument('-P', '--port', dest='port', default = 8080, type=int,
-                                help='Server port')
+            help='Port')
+        self.parser.add_argument('-d', '--default', action="store_true", dest='default_handling', default=False,
+            help='Default handling page')
         self.args = self.parser.parse_args()
 
 
-if __name__ == '__main__':
+def main():
     logging.basicConfig(level=logging.INFO)
 
     cmd = CommandLine()
@@ -119,4 +148,11 @@ if __name__ == '__main__':
 
     superserver.register_page("/download", ExamplePage )
 
+    if cmd.args.default_handling:
+        superserver.set_default_page(DefaultPage)
+
     superserver.start_server()
+
+
+if __name__ == '__main__':
+    main()
