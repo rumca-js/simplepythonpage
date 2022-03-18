@@ -1,5 +1,7 @@
 import logging
 import argparse
+import os
+
 from pathlib import Path
 
 from aiohttp import web
@@ -99,9 +101,18 @@ async def handle(request):
 
 async def default_handle(request):
     page = builder.get_default_page(request.path, request.method, request)
-    page_text = page.write_all(page.get_args())
 
-    return web.Response(text=page_text, content_type=page.get_content_type() )
+    if page.is_binary_content():
+        file_path = request.path[1:]
+        file_path = os.path.abspath(file_path)
+
+        if file_path.find(os.getcwd()) >= 0:
+            return web.FileResponse(path=file_path)
+        else:
+            return web.Response(text="")
+    else:
+        page_text = page.write_all(page.get_args())
+        return web.Response(text=page_text, content_type=page.get_content_type() )
 
 
 class IOSimplePythonPageSuperServer(object):

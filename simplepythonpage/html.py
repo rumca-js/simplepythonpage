@@ -424,6 +424,9 @@ class PageBasic(HtmlEncapsulaterObject):
           ".js"   : "text/javascript",
           ".css"  : "text/css",
           ".ico"  : "image/x-icon",
+          ".jpeg"  : "image/jpeg",
+          ".jpg"  : "image/jpg",
+          ".png"  : "image/png",
         }
 
         sp = os.path.splitext(self._path)
@@ -433,6 +436,19 @@ class PageBasic(HtmlEncapsulaterObject):
                     return mapping[key]
 
         return "text/html"
+
+    def is_binary_content(self):
+        mapping = [
+                ".jpeg",
+                ".jpg",
+                ".png"
+        ]
+        sp = os.path.splitext(self._path)
+        if len(sp) > 1:
+            for item in mapping:
+                if sp[1] == item:
+                    return True
+        return False
 
     def set_title(self, title):
         self._title = title
