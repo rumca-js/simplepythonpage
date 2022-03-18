@@ -7,6 +7,48 @@ import logging
 import simplepythonpage
 
 
+class TestHtmlify(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_new_lines(self):
+        text = "text\nnewline"
+        htmlify = simplepythonpage.html.Htmlify(text)
+
+        self.assertTrue(htmlify.htmlify() == "text<br/>newline")
+
+    def test_http_link(self):
+        text = "text http://instagram.com/arteconcert newline"
+        htmlify = simplepythonpage.html.Htmlify(text)
+
+        self.assertTrue(htmlify.htmlify() == 'text <a href="{0}">{0}</a> newline'.format("http://instagram.com/arteconcert"))
+
+    def test_https_link(self):
+        text = "text https://instagram.com/arteconcert newline"
+        htmlify = simplepythonpage.html.Htmlify(text)
+
+        self.assertTrue(htmlify.htmlify() == 'text <a href="{0}">{0}</a> newline'.format("https://instagram.com/arteconcert"))
+
+    def test_http_2_links(self):
+        text = "text http://instagram.com/arteconcert http://instagram.com/arteconcert newline"
+        htmlify = simplepythonpage.html.Htmlify(text)
+
+        self.assertTrue(htmlify.htmlify() == 'text <a href="{0}">{0}</a> <a href="{0}">{0}</a> newline'.format("http://instagram.com/arteconcert"))
+
+    def test_http_new_line(self):
+        text = "text http://instagram.com/arteconcert\n\nhttp://instagram.com/arteconcert newline"
+        htmlify = simplepythonpage.html.Htmlify(text)
+
+        self.assertTrue(htmlify.htmlify() == 'text <a href="{0}">{0}</a><br/><br/><a href="{0}">{0}</a> newline'.format("http://instagram.com/arteconcert"))
+
+    def test_http_near_end(self):
+        text = "text http://instagram.com/arteconcert"
+        htmlify = simplepythonpage.html.Htmlify(text)
+
+        self.assertTrue(htmlify.htmlify() == 'text <a href="{0}">{0}</a>'.format("http://instagram.com/arteconcert"))
+        
+
 class TestHtmlElement(unittest.TestCase):
 
     def setUp(self):
@@ -16,7 +58,7 @@ class TestHtmlElement(unittest.TestCase):
         pass
 
     def test_page_basic_p_empty(self):
-        page = simplepythonpage.HtmlEncapsulaterObject()
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
         p = page.p()
 
         print("P HTML: " + p.html())
@@ -24,7 +66,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(p.html() == "")
 
     def test_page_basic_p(self):
-        page = simplepythonpage.HtmlEncapsulaterObject()
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
         p = page.p("")
 
         print("P HTML: " + p.html())
@@ -32,7 +74,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(p.html() == "<p></p>")
 
     def test_page_basic_p_text(self):
-        page = simplepythonpage.HtmlEncapsulaterObject()
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
         p = page.p("test_text")
 
         print("P HTML: " + p.html())
@@ -40,7 +82,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(p.html() == "<p>test_text</p>")
 
     def test_page_basic_p_attr(self):
-        page = simplepythonpage.HtmlEncapsulaterObject()
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
         p = page.p("test_text")
         p.set_attr("id", "attr_test")
 
@@ -49,7 +91,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(p.html() == '<p id="attr_test">test_text</p>')
 
     def test_page_basic_p_insert(self):
-        page = simplepythonpage.HtmlEncapsulaterObject()
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
         p = page.p("test_text")
         p.insert(",new_text")
 
@@ -58,7 +100,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(p.html() == '<p>test_text,new_text</p>')
 
     def test_page_basic_p_push(self):
-        page = simplepythonpage.HtmlEncapsulaterObject()
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
         p = page.p("test_text")
         p.push(",new_text")
 
@@ -68,7 +110,7 @@ class TestHtmlElement(unittest.TestCase):
 
     def test_page_basic_form_input(self):
 
-        page = simplepythonpage.HtmlEncapsulaterObject()
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
         f = page.form_input("text", "url")
 
         print("f HTML: " + f.html())
@@ -76,14 +118,14 @@ class TestHtmlElement(unittest.TestCase):
 
     def test_page_basic_form_input_default_value(self):
 
-        page = simplepythonpage.HtmlEncapsulaterObject()
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
         f = page.form_input("text", "url", "deeeeedbeaaaf")
 
         print("f HTML: " + f.html())
         self.assertTrue(f.html() == '<input type="text" id="url" name="url" value="deeeeedbeaaaf" size="13">')
 
     def test_page_basic_3_form_inputs(self):
-        page = simplepythonpage.HtmlEncapsulaterObject()
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
         f = page.form()
         f.set_attr("action", "http://example.com")
         f.set_attr("method", "POST")
@@ -97,7 +139,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(f.html() == '<form action="http://example.com" method="POST"><label for="url">Download link:</label><input type="text" id="url" name="url"><input type="submit" value="Download"></form>')
 
     def test_page_form_options(self):
-        page = simplepythonpage.HtmlEncapsulaterObject()
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
         f = page.form()
         f.set_attr("action", "http://example.com")
         f.set_attr("method", "POST")
@@ -115,7 +157,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(f.html() == '<form action="http://example.com" method="POST"><select id="car" name="car"><option value="volvo">Volvo</option><option value="fiat">Fiat</option></select><input type="submit" value="Download"></form>')
 
     def test_page_form_options(self):
-        page = simplepythonpage.HtmlEncapsulaterObject()
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
         f = page.form()
         f.set_attr("action", "http://example.com")
         f.set_attr("method", "POST")
@@ -133,7 +175,7 @@ class TestHtmlElement(unittest.TestCase):
         self.assertTrue(f.html() == '<form action="http://example.com" method="POST"><select id="car" name="car"><option value="volvo">Volvo</option><option value="fiat" selected>Fiat</option></select><input type="submit" value="Download"></form>')
 
 
-class PageTest(simplepythonpage.PageBasic):
+class PageTest(simplepythonpage.html.PageBasic):
 
     def __init__(self):
         super().__init__()

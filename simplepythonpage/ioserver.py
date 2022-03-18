@@ -14,7 +14,7 @@ https://docs.aiohttp.org/en/stable/web_reference.html
 """
 
 
-class DefaultPage(simplepythonpage.PageBasic):
+class DefaultPage(simplepythonpage.html.PageBasic):
 
     def write_all(self, args):
         text = ""
@@ -32,7 +32,7 @@ class DefaultPage(simplepythonpage.PageBasic):
         return text
 
 
-class ExamplePage(simplepythonpage.PageBasic):
+class ExamplePage(simplepythonpage.html.PageBasic):
 
     def write(self, args):
         text = '<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />'
