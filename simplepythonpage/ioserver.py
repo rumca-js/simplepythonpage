@@ -104,6 +104,9 @@ async def default_handle(request):
 
     if page.is_binary_content():
         file_path = request.path[1:]
+
+        # only allow to show file if it is from this path, not from system
+        # wow, so much security
         file_path = os.path.abspath(file_path)
 
         if file_path.find(os.getcwd()) >= 0:
