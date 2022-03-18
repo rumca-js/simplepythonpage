@@ -358,6 +358,8 @@ class PageBasic(HtmlEncapsulaterObject):
         self._style = ""
         self._path = ""
         self._args = {}
+        self.css_files = []
+        self.js_files = []
 
     def get_content_type(self):
         mapping = {
@@ -365,6 +367,7 @@ class PageBasic(HtmlEncapsulaterObject):
           ".htm"  : "text/html",
           ".js"   : "text/javascript",
           ".css"  : "text/css",
+          ".ico"  : "image/x-icon",
         }
 
         sp = os.path.splitext(self._path)
@@ -438,6 +441,20 @@ class PageBasic(HtmlEncapsulaterObject):
     def write(self, args = None):
         return "Default document"
 
+    def get_css_text(self):
+        text = ""
+        for css in self.css_files:
+            text += '<link rel="stylesheet" href="{0}">'.format(css)
+
+        return text
+
+    def get_js_text(self):
+        text = ""
+        for js in self.js_files:
+            text += '<script type="text/javascript" src="{0}"></script>'.format(js)
+
+        return text
+
     def write_all(self, args = None):
         text = self.write(args)
 
@@ -448,9 +465,17 @@ class PageBasic(HtmlEncapsulaterObject):
                <meta charset="{1}">
                <meta name="viewport" content="width=device-width, initial-scale=1">
                <style>{2}</style>
+               {3}
+               {4}
             </head>
-            <body>{3}</body>
-            </html>""".format(self._title, self._charset, self._style, text)
+            <body>{5}</body>
+            </html>""".format(self._title,
+                    self._charset,
+                    self._style,
+                    self.get_css_text(),
+                    self.get_js_text(),
+                    text)
+
         return complete_text
 
     def super_write(self):

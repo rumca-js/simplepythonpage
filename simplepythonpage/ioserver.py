@@ -16,7 +16,7 @@ https://docs.aiohttp.org/en/stable/web_reference.html
 
 class DefaultPage(simplepythonpage.PageBasic):
 
-    def write(self, args):
+    def write_all(self, args):
         text = ""
 
         path = Path(self.get_path()[1:])
@@ -35,7 +35,9 @@ class DefaultPage(simplepythonpage.PageBasic):
 class ExamplePage(simplepythonpage.PageBasic):
 
     def write(self, args):
-        return "Example page"
+        text = '<link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />'
+        text += "Example page"
+        return text
 
     def set_path(self, path):
         pass
