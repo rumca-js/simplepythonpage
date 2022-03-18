@@ -2,6 +2,15 @@ import re
 import os
 
 
+"""
+Ref emoji
+ https://www.w3schools.com/charsets/ref_emoji.asp
+
+pass unicode as:
+U"\U0001F441"
+, or
+u", \u2705"
+"""
 class UtfSymbols(object):
 
     def get_eye():
@@ -12,7 +21,6 @@ class UtfSymbols(object):
 
     def red_x():
         return u"\u274C"
-
 
 
 class Htmlify(object):
