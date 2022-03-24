@@ -90,6 +90,15 @@ class TestHtmlElement(unittest.TestCase):
 
         self.assertTrue(p.html() == '<p id="attr_test">test_text</p>')
 
+    def test_page_basic_p_attr_no_value(self):
+        page = simplepythonpage.html.HtmlEncapsulaterObject()
+        p = page.p("test_text")
+        p.set_attr("nofullscreen", None)
+
+        print("P HTML: " + p.html())
+
+        self.assertTrue(p.html() == '<p nofullscreen>test_text</p>')
+
     def test_page_basic_p_insert(self):
         page = simplepythonpage.html.HtmlEncapsulaterObject()
         p = page.p("test_text")
