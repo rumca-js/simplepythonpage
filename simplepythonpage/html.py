@@ -441,6 +441,7 @@ class PageBasic(HtmlEncapsulaterObject):
         mapping = [
                 ".jpeg",
                 ".jpg",
+                ".ico",
                 ".png"
         ]
         sp = os.path.splitext(self._path)
