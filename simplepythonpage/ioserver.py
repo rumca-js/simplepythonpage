@@ -18,16 +18,24 @@ https://docs.aiohttp.org/en/stable/web_reference.html
 
 class DefaultPage(simplepythonpage.html.PageBasic):
 
+    def get_file_name(self):
+        return Path(self.get_path()[1:])
+
+    def is_file_contents(self):
+        file_name = self.get_file_name()
+
+        if file_name.is_file():
+            return True
+        else:
+            return False
+
     def write_all(self, args):
         text = ""
 
-        path = Path(self.get_path()[1:])
-        file_name = self.get_path()[1:]
+        file_name = self.get_file_name()
 
-        if path.is_file():
-            with open(file_name, encoding='utf-8') as fh:
-                data = fh.read()
-                text = data
+        if file_name.is_file():
+            text = file_name.read_bytes()
         else:
             text = "You're lost!"
 
@@ -102,14 +110,12 @@ async def handle(request):
 async def default_handle(request):
     page = builder.get_default_page(request.path, request.method, request)
 
-    if page.is_binary_content():
-        file_path = request.path[1:]
+    if page.is_file_contents():
+        file_path = page.get_file_name()
 
-        # only allow to show file if it is from this path, not from system
-        # wow, so much security
-        file_path = os.path.abspath(file_path)
+        file_path = file_path.resolve()
 
-        if file_path.find(os.getcwd()) >= 0:
+        if str(file_path).find(os.getcwd()) >= 0:
             return web.FileResponse(path=file_path)
         else:
             return web.Response(text="")
