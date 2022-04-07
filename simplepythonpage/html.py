@@ -307,6 +307,12 @@ class HtmlEncapsulaterObject(object):
     def pre(self, text = None):
         return HtmlContainer("pre", text)
 
+    def ul(self, text = None):
+        return HtmlContainer("ul", text)
+
+    def li(self, text = None):
+        return HtmlContainer("li", text)
+
     def br(self):
         hto = HtmlOneLiner("br")
         return hto
