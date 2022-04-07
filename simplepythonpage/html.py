@@ -539,6 +539,8 @@ class PageBasic(HtmlEncapsulaterObject):
         text = self.write(args)
 
         complete_text = """
+        self.set_script(js_script)
+            <!DOCTYPE html>
             <html>
             <head>
                <title>{0}</title>
