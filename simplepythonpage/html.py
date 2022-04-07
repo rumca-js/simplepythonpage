@@ -409,6 +409,22 @@ class HtmlEncapsulaterObject(object):
         cont.set_attr("media", "screen")
         return cont
 
+    def encode_link_with_fields(self, url, fields):
+        field_text = ""
+
+        for field in fields:
+            value = fields[field]
+            if value is None:
+                continue
+
+            if field_text != "":
+                field_text = field_text + "&"
+
+            field_text += "{0}={1}".format(field, value)
+
+        text = url + "?" + field_text
+        return text
+
 
 class PageBasic(HtmlEncapsulaterObject):
 
