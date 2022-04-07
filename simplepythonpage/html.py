@@ -392,9 +392,10 @@ class HtmlEncapsulaterObject(object):
         cont.set_attr("src", src)
         return cont
 
-    def script(self, src):
+    def script(self, src = None):
         cont = HtmlContainer("script")
-        cont.set_attr("src", src)
+        if src:
+            cont.set_attr("src", src)
         return cont
 
     def css_link(self, src):
